@@ -38,7 +38,7 @@
 * Based on original [lleo_dip.exe](https://lleo.me/soft/lleo_dip.htm) program by Leonid Kaganov with some additions and improvements
 
 ### How to use it? ###
-With words database fro original program:
+Using original program's words database:
 `python lleo_dip.py c ./words/GS.BSY  ./steps/CHASTU.RTM`
 ####or####
 1. Generate words base from text file, like so:
