@@ -7,12 +7,16 @@
 * Основана на алгоритме программы [lleo_dip.exe](https://lleo.me/soft/lleo_dip.htm) написанной Леонидой Кагановым
 
 ### Как пользоваться? ###
+
+Используя базу слов от оригинальной программы:
+`python lleo_dip.py c ./words/GS.BSY  ./steps/CHASTU.RTM`
+####или:####
 1. Создать базу слов из текстового файла, например:
-`python3 lleo_dip.py b ./words/tolstoy.words ./examples/texts/tolstoy.txt`
+`python lleo_dip.py b ./words/tolstoy.words ./examples/texts/tolstoy.txt`
 2. После предыдущего шага ударения в словах будут расставлены автоматически, но далеко не всегда корректно. Если хотите расставить в словах ударения вручную, то запускаете программу с ключом `u`:
-`python3 lleo_dip.py u ./words/tolstoy.words ./syll/$$$$SLOG.BSY`
+`python lleo_dip.py u ./words/tolstoy.words ./syll/$$$$SLOG.BSY`
 3. Запустить генерацию стихов, указав программе файл с ритмом стихов:
-`python3 lleo_dip.py c ./words/tolstoy.words ./steps/CHASTU.RTM`
+`python lleo_dip.py c ./words/tolstoy.words ./steps/CHASTU.RTM`
 4. Ура, теперь вы -- СамСебеПоэт!
 
 ### Что еще скажете? ###
@@ -34,13 +38,15 @@
 * Based on original [lleo_dip.exe](https://lleo.me/soft/lleo_dip.htm) program by Leonid Kaganov with some additions and improvements
 
 ### How to use it? ###
+With words database fro original program:
+`python lleo_dip.py c ./words/GS.BSY  ./steps/CHASTU.RTM`
+####or####
 1. Generate words base from text file, like so:
-`python3 lleo_dip.py b ./words/tolstoy.words ./examples/texts/tolstoy.txt`
+`python lleo_dip.py b ./words/tolstoy.words ./examples/texts/tolstoy.txt`
 2. If would like, you can mark words accents manually:
-`python3 lleo_dip.py u ./words/tolstoy.words ./syll/$$$$SLOG.BSY`
+`python lleo_dip.py u ./words/tolstoy.words ./syll/$$$$SLOG.BSY`
 3. Generate verses:
-`python3 lleo_dip.py c ./words/tolstoy.words ./steps/CHASTU.RTM`
-
+`python lleo_dip.py c ./words/tolstoy.words ./steps/CHASTU.RTM`
 4. Enjoy!
 
 ### What else? ###
