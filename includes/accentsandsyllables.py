@@ -3,16 +3,37 @@
 # Copyright 2016 Sergey Lebedev
 # Licensed under the Apache License, Version 2.0
 
-import os, sys, struct, pickle
+import os, sys, struct, re, pickle
 
 import includes.keyboard_work as keyboard
+import includes.wordforms as wordforms
 import includes.utils as utils
 
 class AccentsAndSyllables:
 	OLD_BASE_FORMAT_FILE_EXT = '.BSY'	
 	NEW_BASE_FORMAT_FILE_EXT = '.syll'
+
+	ACCENTS_DICT_INFO_DIVIDER = ' '
+	ACCENTS_DICT_MULTIPLE_ACCENTS_DIVIDER = ","	
+	ACCENTS_DICT_FILENAME = "dictonaries/zalizniak.txt"
 	
 	syllablesAccentsBase = {}
+	accentsDict = None
+	wordFormsDictObj = None	
+	
+	def setAccentsAndSyllablesDict_N(self, words):
+		""" Automatically sets Accents And Syllables in words base with dictionary"""
+		""" changes syllablesAccentsBase according to new accents statistics """
+		
+		if not self.accentsDict:
+			self.accentsDict = self.__loadAccentsDict(self.ACCENTS_DICT_FILENAME)
+		if not self.wordFormsDictObj:
+			self.wordFormsDictObj = wordforms.wordFormsDict()
+
+		for key, word in words.items():			
+			word = self.setAccentsAndSyllablesDict(word)
+
+		return words
 	
 	def setAccentsAndSyllablesAuto_N(self, words):
 		""" Automatically sets Accents And Syllables in words base"""
@@ -29,6 +50,39 @@ class AccentsAndSyllables:
 				return words			
 		#saveSLOGBase()	
 		return words
+	
+	def setAccentsAndSyllablesDict(self, wordInfo):
+		""" sets Accents And Syllables in one word with dictionary"""
+		""" changes wordInfo and syllablesAccentsBase according to new accents statistics"""	
+		
+		if wordInfo['manualAccent']:  # ;а проставлено ли там уже ударение?
+			return 
+
+		syllables = utils.Utils.getWordSyllables(wordInfo['word'])	
+		wordInfo['sylNum'] = len(syllables)		
+		if wordInfo['sylNum'] < 1:
+			wordInfo['sylNum'] = 1
+		if wordInfo['sylNum'] < 2:
+			wordInfo['accentSylNum'] = 1  # in one-syllable word accent falls on that unique syllable	 
+			return wordInfo
+
+		wordForm = self.wordFormsDictObj.findWordForm(wordInfo['word'])				
+		if not wordForm:
+			return self.setAccentsAndSyllablesAuto(wordInfo)			
+			
+		
+		accentedLetterNum = self.__getAccentFromDict(wordForm)		
+		if not accentedLetterNum:			
+			return self.setAccentsAndSyllablesAuto(wordInfo)						
+
+		accentedSyllNum = AccentsAndSyllables.getSyllableNumByLetterNum(wordForm, accentedLetterNum)		
+		if wordInfo['sylNum'] >= accentedSyllNum:  # вдруг в словоформе больше слогов, чем в слове
+			wordInfo['accentSylNum'] = accentedSyllNum
+		else:
+			return self.setAccentsAndSyllablesAuto(wordInfo)
+
+		return wordInfo
+
 	
 	def setAccentsAndSyllablesManual(self, wordInfo):
 		if wordInfo['manualAccent']:	#;а проставлено ли там уже ударение?
@@ -116,6 +170,77 @@ class AccentsAndSyllables:
 			fileName = file_name + file_extension 		
 		AccentsAndSyllables.__saveBaseNewFormat(self.syllablesAccentsBase, fileName)
 		print('База ударений и слогов сохранена в файле ' + fileName)
+
+	@staticmethod
+	def getSyllableNumByLetterNum(word, letterNum):
+		if len(word) < letterNum:
+			return None
+
+		syllables = utils.Utils.getWordSyllables(word)		
+		count = 0
+		i = 1
+		for syllable in syllables:			
+			count = count + len(syllable)
+			if letterNum <= count:
+				return i
+			i = i + 1
+		return None
+	
+	@staticmethod
+	def __loadBaseOldFormat(fileName):
+		firstRussianLetterInAscii866 = 0xA0
+		lastRussianLetterInAscii866 = 0xFF
+		dashAsciiCode = 0x2D
+		
+		with open(fileName, mode='rb') as file:
+			fileContent = file.read()
+			
+		startRecordLen = struct.unpack(str(1) + "B", fileContent[0 : 1])[0]
+		i = startRecordLen
+		
+		syllablesAccentsBase = {}
+		k = 0
+		while True:
+			if i >= len(fileContent):
+				break
+			
+			recordLen = struct.unpack(str(1) + "B", fileContent[i : i + 1])[0]		
+			if recordLen == 0:
+				break  # base format error
+			
+			s = ''		
+			for i2 in range(i, i + recordLen - 3):
+				if i2 >= len(fileContent):
+					break									
+				if (fileContent[i2] >= firstRussianLetterInAscii866 and fileContent[i2] <= lastRussianLetterInAscii866) or fileContent[i2] == dashAsciiCode:
+					tmp = struct.unpack(str(1) + "s", fileContent[i2 : i2 + 1])[0]
+					s = s + tmp.decode('866')
+					
+			i = i2 + 1
+			accentedSylNum = struct.unpack("B", fileContent[i : i + 1])[0]		
+			notAccentedSylNum = struct.unpack("B", fileContent[i + 2 : i + 3])[0]		
+			
+			# s = s.replace('-', '')
+			syllablesAccentsBase[k] = {'slog' : s,
+						'accStat': [accentedSylNum, notAccentedSylNum]
+						}			
+			i = i + 4		
+			k = k + 1
+			
+		return syllablesAccentsBase
+
+	@staticmethod
+	def __loadBaseNewFormat(fileName):
+		f = open(fileName, 'rb') 
+		return pickle.load(f) 
+		f.close()
+
+	@staticmethod
+	def __saveBaseNewFormat(syllablesAccentsBase, fileName):		
+		f = open(fileName, 'wb') 
+		pickle.dump(syllablesAccentsBase, f) 
+		f.close()
+
 	
 	def __setAccentAuto(self, syllables):	
 		prognose_STRING = []
@@ -192,58 +317,30 @@ class AccentsAndSyllables:
 			resultSyllables.append(tmpSyllable)
 			
 		return resultSyllables
-	
-	@staticmethod
-	def __loadBaseOldFormat(fileName):
-		firstRussianLetterInAscii866 = 0xA0
-		lastRussianLetterInAscii866 = 0xFF
-		dashAsciiCode = 0x2D
-		
-		with open(fileName, mode='rb') as file:
-			fileContent = file.read()
-			
-		startRecordLen = struct.unpack(str(1) + "B", fileContent[0 : 1])[0]
-		i = startRecordLen
-		
-		syllablesAccentsBase = {}
-		k = 0
-		while True:
-			if i >= len(fileContent):
-				break
-			
-			recordLen = struct.unpack(str(1) + "B", fileContent[i : i + 1])[0]		
-			if recordLen == 0:
-				break  # base format error
-			
-			s = ''		
-			for i2 in range(i, i + recordLen - 3):
-				if i2 >= len(fileContent):
-					break									
-				if (fileContent[i2] >= firstRussianLetterInAscii866 and fileContent[i2] <= lastRussianLetterInAscii866) or fileContent[i2] == dashAsciiCode:
-					tmp = struct.unpack(str(1) + "s", fileContent[i2 : i2 + 1])[0]
-					s = s + tmp.decode('866')
-					
-			i = i2 + 1
-			accentedSylNum = struct.unpack("B", fileContent[i : i + 1])[0]		
-			notAccentedSylNum = struct.unpack("B", fileContent[i + 2 : i + 3])[0]		
-			
-			# s = s.replace('-', '')
-			syllablesAccentsBase[k] = {'slog' : s,
-						'accStat': [accentedSylNum, notAccentedSylNum]
-						}			
-			i = i + 4		
-			k = k + 1
-			
-		return syllablesAccentsBase
 
-	@staticmethod
-	def __loadBaseNewFormat(fileName):
-		f = open(fileName, 'rb') 
-		return pickle.load(f) 
-		f.close()
 
-	@staticmethod
-	def __saveBaseNewFormat(syllablesAccentsBase, fileName):		
-		f = open(fileName, 'wb') 
-		pickle.dump(syllablesAccentsBase, f) 
-		f.close()
+	def __getAccentFromDict(self, word):	
+		if word in self.accentDict:
+			return self.accentDict[word]
+		return None
+
+	def __loadAccentsDict(self, filename):
+		with open(filename, 'r', encoding='cp1251') as f:
+			s = f.read()	
+
+		lines = re.split("\n", s)			   
+		self.accentDict = {}	
+		for i, s1 in enumerate(lines):
+			s1 = s1.strip()
+			if not s1:
+				continue
+			wordDictInfo = re.split(self.ACCENTS_DICT_INFO_DIVIDER, s1)
+			wordDictInfo = list(filter(None, wordDictInfo))
+			if wordDictInfo[1].find(".") != -1:
+				mainAccent = re.split("\.", wordDictInfo[1])[0]
+			elif wordDictInfo[1].find(self.ACCENTS_DICT_MULTIPLE_ACCENTS_DIVIDER) != -1:
+				mainAccent = re.split(self.ACCENTS_DICT_MULTIPLE_ACCENTS_DIVIDER, wordDictInfo[1])[0]
+			else:
+				mainAccent = wordDictInfo[1] 
+
+			self.accentDict[wordDictInfo[0]] = int(mainAccent)

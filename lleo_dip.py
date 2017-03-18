@@ -72,8 +72,9 @@ elif args.mode == 'b':
         if oldWords:        
             b.words = oldWords
     words = b.refillBase(text)
-    accents = accentsandsyllables.AccentsAndSyllables()
-    accents.setAccentsAndSyllablesAuto_N(words)    
+    print('Расстановка ударений...')    
+    words = (accentsandsyllables.AccentsAndSyllables()).setAccentsAndSyllablesDict_N(words)    
+    
     wordbasework.WordBaseWork.saveWordBase(args.basename, words)
         
 elif args.mode == 'u':
