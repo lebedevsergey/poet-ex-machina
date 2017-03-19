@@ -235,12 +235,12 @@ class WordBaseWork:
                 }			
             words[count] = wordInfo
             count = count + 1			
-							
-            if i >= len(fileContent)-35: #empirical value
+					
+            empiricalValue1 = 35
+            if i >= len(fileContent) - empiricalValue1: 
                 break
-										
-        # прореживаем - почему-то оригинальная программа выдала базу с ассосиацией-ссылкой на  несуществущее слово
-        WordBaseWork.__filterInexistingAssociation(words) 	
+										        
+        WordBaseWork.__filterInexistingAssociation(words) # прореживаем - почему-то оригинальная программа может выдать базу с ассосиацией-ссылкой на несуществущее слово
 		
         return words
 				

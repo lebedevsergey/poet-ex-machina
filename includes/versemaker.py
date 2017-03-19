@@ -3,16 +3,16 @@
 # Copyright 2016 Sergey Lebedev
 # Licensed under the Apache License, Version 2.0
 
+import locale, random, re, sys
 import includes.rhymesandritms as rhymes
 import includes.utils as utils
 import includes.wordbasework as wordbasework
-import locale, random, re, sys
 
-locale.setlocale(locale.LC_ALL, '')
-code = locale.getpreferredencoding()
+#locale.setlocale(locale.LC_ALL, '')
+#code = locale.getpreferredencoding()
 
 class VerseMaker:	
-    noOneSyllableEnds = False
+    noOneSyllableEnds = False               # ensures that verse will not end with one-syllable words
 	
     debugMode = False
     debugWordFoundBaseCount = 0 
@@ -46,7 +46,7 @@ class VerseMaker:
         return verseN
 
     # make one verse
-    def makeVerse(self):		#;print ;db 13,10,13,10,'┌───────пишем новое четверостишие──┐',0
+    def makeVerse(self):
         rhymesBase = {}
         verseLines = [None] * len(self.verseTemplate)
 		
@@ -55,14 +55,14 @@ class VerseMaker:
 			
         curLineIndex = len(self.verseTemplate)-1					
         while curLineIndex >= 0:		
-            if verseLines[curLineIndex]:								#; строка уже написана?
+            if verseLines[curLineIndex]:                                                #; строка уже написана?
                 curLineIndex = curLineIndex - 1
                 continue
 			
             verseLine = self.__create_STRING(self.verseTemplate[curLineIndex], rhymesBase)			
             if (verseLine == None):						
                 rhymeType = self.verseTemplate[curLineIndex]['rhymeType']
-                rhymesBase.pop(rhymeType, None)												#;стереть такую рифму							
+                rhymesBase.pop(rhymeType, None)                                         #;стереть такую рифму							
                 self.__erase_STRING_with_RHYME(rhymeType, curLineIndex, verseLines) 	#;стереть все строки с этой рифмой															
 				
                 curLineIndex = len(self.verseTemplate)-1
@@ -99,8 +99,7 @@ class VerseMaker:
             rhymeParams = list(filter(None, rhymeParams))		
             verseTemplate.append({'rhymeType': rhymeParams[1], 'pattern': rhymeParams[0]})	
         return verseTemplate
-
-    # NoOneSyllableEndsMode ensures that verse will not end with one-syllable words
+    
     def setNoOneSyllableEndsMode(self, mode):
         self.noOneSyllableEnds = mode
 
@@ -128,7 +127,7 @@ class VerseMaker:
             rhymedWord = None
             useFreeRhyme = True
 		
-        while True:			
+        while True:
             if len(E_stack) == 0:
                 isEndWord = True
             else: 
@@ -144,7 +143,7 @@ class VerseMaker:
                 self.debugWordFoundAssocCount = self.debugWordFoundAssocCount + 1
 									
             if checkedWord == None:						
-                if not isEndWord: 									#;13) Если слово не оконечное ■ к 16 db 13,10,'ОШИБКА ПОИСКА  С Л О В А - после /',0
+                if not isEndWord: 								#;13) Если слово не оконечное ■ к 16 db 13,10,'ОШИБКА ПОИСКА  С Л О В А - после /',0
                     state = E_stack.pop()							#; Извлечь из стека Е предыдущий шаг, слово отбросить, а все остальное установить как было, в т.ч. прежнюю группу поиска
                     continue
                 else:
@@ -152,7 +151,7 @@ class VerseMaker:
                         self.__clearUsedInLineFlags()
                         state['searchWordsMode'] = self.SEARCH_BASE 					
                         continue
-                    if state['searchWordsMode'] == self.SEARCH_BASE: 	# если ■сфера поиска■ = вся база
+                    if state['searchWordsMode'] == self.SEARCH_BASE:                            # если ■сфера поиска■ = вся база
                         if not useFreeRhyme:
                             return None
                         else:									# Если и рифма была свободная, то						
@@ -160,7 +159,7 @@ class VerseMaker:
 	
             if state['prevWord'] and checkedWord['word'] == state['prevWord']['word']:
                 continue
-                    #;*6) Проверить совпадение ритма (такт и максимальное количество слогов		
+                                                                                                #;*6) Проверить совпадение ритма (такт и максимальное количество слогов		
             if not rhymes.RhymesAndRitms.RITM_li(checkedWord, state['prevWord'], lineTemplate['pattern'], state['curTemplateSymlIndex']):
                 continue			
             if self.noOneSyllableEnds and checkedWord['sylNum'] < 2:
@@ -169,13 +168,11 @@ class VerseMaker:
                 continue			
 
             if checkedWord and self.debugMode: 
-                print (wordFoundMode + ' ', checkedWord)				
-                    #;*7) Погрузить в стек Е найденное слово,		
+                print (wordFoundMode + ' ', checkedWord)				                    
             state['curWord'] = checkedWord
-            E_stack.append(state.copy())
-					
-                #;*8) Ассоциации найденного слова ;занести в сферу поиска		
-            state['FIELD'] = wordbasework.WordBaseWork.getAssoc(checkedWord, self.words)
+            E_stack.append(state.copy())                                                        #;*7) Погрузить в стек Е найденное слово,
+					                
+            state['FIELD'] = wordbasework.WordBaseWork.getAssoc(checkedWord, self.words)        #;*8) Ассоциации найденного слова ;занести в сферу поиска		
             if state['FIELD']:
                 state['searchWordsMode'] = self.SEARCH_ASSOC
             else:
@@ -192,15 +189,15 @@ class VerseMaker:
             state['curWord'] = None
 		
         s = ''		
-        while True:													#;*9) Вынуть из стека Е все этапы, запоминая ; слова в буфере готовых строк	
+        while True:                                                                             #;*9) Вынуть из стека Е все этапы, запоминая ; слова в буфере готовых строк	
             if not E_stack:
                 break
             state = E_stack.pop()		
             s = s + ' ' + utils.Utils.highlightAccentedVowel(state['curWord'])
 		
-        rhymesBase[curRhymeType] = state['curWord']					#;*11) Записать оконечное слово в базу рифм, ;заместо предыдущего (если оно было)
+        rhymesBase[curRhymeType] = state['curWord']                                             #;*11) Записать оконечное слово в базу рифм, ;заместо предыдущего (если оно было)
             #поставить флаг что слово использовано		
-        state['curWord']['usedAsRhyme'] = True						# в след строке это же слово можно использовать		
+        state['curWord']['usedAsRhyme'] = True                                                  # в след строке это же слово можно использовать		
 		
         return s
 		
@@ -213,10 +210,10 @@ class VerseMaker:
 					
             if not word['usedInLine']:
                 if not isEndWord:
-                    word['usedInLine'] = True		#; помечаем как использованный
+                    word['usedInLine'] = True                                                   #; помечаем как использованный
                     return word
                 elif not word['usedAsRhyme']:
-                    word['usedInLine'] = True		#  ; помечаем как использованный
+                    word['usedInLine'] = True                                                   #  ; помечаем как использованный
                     return word
 				
             i = i + 1					
@@ -232,7 +229,7 @@ class VerseMaker:
             curWordIndex = random.randint(0, len(FIELD)-1)
             word = FIELD[curWordIndex]
             FIELD.remove(word)	 
-            if not isEndWord:							# если не оконечное слово, то можно повторяться
+            if not isEndWord:                                   # если не оконечное слово, то можно повторяться
                 return word
             if not word['word']['usedAsRhyme']:			# ;использован ли уже как рифма?
                 return word
