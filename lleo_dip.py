@@ -42,9 +42,8 @@ if args.mode == 'c':
     while True:        
         s = '***' + "\n" + v.makeVerse_N(2) + "\n"
         print(s)
-        f.write(s)
-        (key, extKey) = keyboard_work.KeyboardWork.getch()                
-        if keyboard_work.KeyboardWork.isBreakKeyPressed(key, extKey):
+        f.write(s)        
+        if keyboard_work.KeyboardWork.isBreakKeyPressed(keyboard_work.KeyboardWork.getch()):
             break
     f.close()
                         
@@ -55,9 +54,8 @@ elif args.mode == 'p':
     while True:        
         s = p.makeProse() + "\n"
         print(s)
-        f.write(s)     
-        (key, extKey) = keyboard_work.KeyboardWork.getch()                 
-        if keyboard_work.KeyboardWork.isBreakKeyPressed(key, extKey):
+        f.write(s)             
+        if keyboard_work.KeyboardWork.isBreakKeyPressed(keyboard_work.KeyboardWork.getch()):
             break
     f.close()
                 
@@ -72,8 +70,9 @@ elif args.mode == 'b':
         if oldWords:        
             b.words = oldWords
     words = b.refillBase(text)
-    accents = accentsandsyllables.AccentsAndSyllables()
-    accents.setAccentsAndSyllablesAuto_N(words)    
+    print('Расстановка ударений...')    
+    words = (accentsandsyllables.AccentsAndSyllables()).setAccentsAndSyllablesDict_N(words)    
+    
     wordbasework.WordBaseWork.saveWordBase(args.basename, words)
         
 elif args.mode == 'u':

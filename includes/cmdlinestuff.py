@@ -128,4 +128,3 @@ def usageOldMsg():
 def usage():    
     print(newMsg)
     exit()
-         

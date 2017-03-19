@@ -15,7 +15,8 @@ class KeyboardWork:
     ENTER_KEY_UNICODE = '\u000B'
     ESC_KEY_UNICODE = '\u001B'
     
-    CTRL_C_KEY = b'\x03'
+    CTRL_C = b'\x03'
+    CTRL_D = b'\x04'
         
     # gets pressed key 
     @staticmethod
@@ -25,11 +26,29 @@ class KeyboardWork:
             extendedKeyCode = click.getchar()
             return mainKeyCode, extendedKeyCode
         extendedKeyCode = None
-        return mainKeyCode, extendedKeyCode
-    
-    # gets pressed key 
+        print(mainKeyCode, extendedKeyCode)
+        return (mainKeyCode, extendedKeyCode)
+        
     @staticmethod
-    def isBreakKeyPressed(key, extKey):
-        if key == KeyboardWork.ESC_KEY or key == KeyboardWork.CTRL_C_KEY or key == KeyboardWork.ESC_KEY_UNICODE:
+    def isBreakKeyPressed(keyInfo):
+        if keyInfo[0] == KeyboardWork.ESC_KEY or keyInfo[0] == KeyboardWork.ESC_KEY_UNICODE or keyInfo[0] == KeyboardWork.CTRL_C or keyInfo[0] == KeyboardWork.CTRL_D:
             return True
         return False
+    
+    @staticmethod
+    def isEnterPressed(keyInfo):
+        if keyInfo[0] == KeyboardWork.ENTER_KEY or keyInfo[0] == KeyboardWork.ENTER_KEY_UNICODE:
+            return True
+        return False
+        
+    @staticmethod
+    def isArrowRightPressed(keyInfo):        
+        if (keyInfo[0] == KeyboardWork.EXT_KEY_PREFIX and keyInfo[1] == KeyboardWork.ARROW_RIGHT_KEY) or keyInfo[0] == KeyboardWork.ARROW_RIGHT_KEY_UNICODE:
+            return True
+        return False    
+    
+    @staticmethod
+    def isArrowLeftPressed(keyInfo):
+        if (keyInfo[0] == KeyboardWork.EXT_KEY_PREFIX and keyInfo[1] == KeyboardWork.ARROW_LEFT_KEY) or keyInfo[0] == KeyboardWork.ARROW_LEFT_KEY_UNICODE:
+            return True
+        return False    
