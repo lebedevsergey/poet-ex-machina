@@ -10,6 +10,7 @@ import includes.wordforms as wordforms
 import includes.utils as utils
 
 class AccentsAndSyllables:
+
     OLD_BASE_FORMAT_FILE_EXT = '.BSY'	
     NEW_BASE_FORMAT_FILE_EXT = '.syll'
 
@@ -21,6 +22,7 @@ class AccentsAndSyllables:
     accentsDict = None
     wordFormsDictObj = None	
 	
+
     def setAccentsAndSyllablesDict_N(self, words):
         """ Automatically sets Accents And Syllables in words base with dictionary"""
         """ changes syllablesAccentsBase according to new accents statistics """		
@@ -269,7 +271,6 @@ class AccentsAndSyllables:
                 syllableStatRecord['accStat'][0] = syllableStatRecord['accStat'][0] + 1  
             else:
                 syllableStatRecord['accStat'][1] = syllableStatRecord['accStat'][1] + 1
-
 
     def __clearInputLine(self, lenToClear):
         print("\r", end='')
