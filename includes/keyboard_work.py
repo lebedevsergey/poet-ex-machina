@@ -25,8 +25,7 @@ class KeyboardWork:
         if mainKeyCode == KeyboardWork.EXT_KEY_PREFIX:        
             extendedKeyCode = click.getchar()
             return mainKeyCode, extendedKeyCode
-        extendedKeyCode = None
-        print(mainKeyCode, extendedKeyCode)
+        extendedKeyCode = None        
         return (mainKeyCode, extendedKeyCode)
         
     @staticmethod

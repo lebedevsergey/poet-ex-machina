@@ -106,44 +106,31 @@ class Utils:
         syllables = []		
         curSyll = ''
         for i, curSym in enumerate(word):
-            curSyll = curSyll + curSym
-            # 	          // Проверка на признаки конца слогов
-            # 	          // если буква равна 'й' и она не первая и не последняя и это не последний слог
-            if curSym == 'й' and i > 0 and i < len(word)-1 and isNotLastSyllable(word[i:]):    
-                syllables.append(curSyll)
-                curSyll = '' 
-                continue           
-            # 			// если текущая гласная и следующая тоже гласная
-            if i < len(word)-1 and Utils.isVowel(curSym) and Utils.isVowel(word[i + 1]):              
-                syllables.append(curSyll)
-                curSyll = ''             
-                continue
-            # 	          // если текущая гласная, следующая согласная, а после неё гласная
-            if i < len(word) - 2 and Utils.isVowel(curSym) and Utils.isCons(word[i + 1]) and Utils.isVowel(word[i + 2]):
-                syllables.append(curSyll)
-                curSyll = '' 
-                continue
-            #           // если текущая гласная, следующая глухая согласная, а после согласная и это не последний слог
-            if i < len(word) - 2 and Utils.isVowel(curSym) and Utils.isDeaf(word[i + 1]) and Utils.isCons(word[i + 2]) and isNotLastSyllable(word[(i + 1):]):                
-                syllables.append(curSyll)
-                curSyll = '' 
-                continue			
-            #           // если текущая гласная, следующая глухая согласная, а после согласна� и это не последний слог (новые правила)
-            if i < len(word) - 2 and Utils.isVowel(curSym) and Utils.isVoiced(word[i + 1]) and Utils.isCons(word[i + 2]) and isNotLastSyllable(word[(i + 1):]):                
-                syllables.append(curSyll)
-                curSyll = '' 
-                continue
-            #           // если текущая звонкая или шипящая согласная, перед ней гласная, 
-            #             следующая не гласная и не другая, и это не последний слог
+            curSyll = curSyll + curSym            
+            # 	          // Проверки на признаки конца слогов            
+            if curSym == 'й' and i > 0 and i < len(word)-1 and isNotLastSyllable(word[i:]):
+                isSyllReady = True      # буква равна 'й' и она не первая и не последняя и это не последний слог
+            elif i < len(word)-1 and Utils.isVowel(curSym) and Utils.isVowel(word[i + 1]):
+                isSyllReady = True      # текущая гласная и следующая тоже гласная
+            elif i < len(word) - 2 and Utils.isVowel(curSym) and Utils.isCons(word[i + 1]) and Utils.isVowel(word[i + 2]):
+                isSyllReady = True      # текущая гласная, следующая согласная, а после неё гласная
+            elif i < len(word) - 2 and Utils.isVowel(curSym) and Utils.isDeaf(word[i + 1]) and Utils.isCons(word[i + 2]) and isNotLastSyllable(word[(i + 1):]):
+                isSyllReady = True      #  текущая гласная, следующая глухая согласная, а после согласная и это не последний слог                            
+            elif i < len(word) - 2 and Utils.isVowel(curSym) and Utils.isVoiced(word[i + 1]) and Utils.isCons(word[i + 2]) and isNotLastSyllable(word[(i + 1):]):                
+                isSyllReady = True      # текущая гласная, следующая глухая согласная, а после согласна� и это не последний слог (новые правила)
+            elif i < len(word) - 1 and Utils.isOther(curSym) and not Utils.isVowel(word[i + 1]) and isNotLastSyllable(word[0:i]):
+                isSyllReady = True       # текущая другая, а следующая не гласная если это первый слог 
+            # текущая звонкая или шипящая согласная, перед ней гласная, следующая не гласная и не другая, и это не последний слог
             # 			if i > 0 and i < len(word) - 1 and Utils.isVoiced(curSym) and Utils.isVowel(word[i - 1]) and not (Utils.isVowel(word[i + 1]) or Utils.isOther(word[i + 1])) and isNotLastSyllable(word[(i+1):]):    
             # 				syllables.append(curSlog)
             # 				curSlog = '' 
-            # 				continue
-            #           // если текущая другая, а следующая не гласная если это первый слог
-            if i < len(word) - 1 and Utils.isOther(curSym) and not Utils.isVowel(word[i + 1]) and isNotLastSyllable(word[0:i]):
+            # 				continue            
+            else:
+                isSyllReady = False
+            
+            if isSyllReady:
                 syllables.append(curSyll)
-                curSyll = ''
-                continue
+                curSyll = ''                 
 
         syllables.append(curSyll)
         return syllables			
