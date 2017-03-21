@@ -6,7 +6,10 @@
 # Copyright 2016 Sergey Lebedev
 # Licensed under the Apache License, Version 2.0
 
-import sys, os, argparse 
+import sys, os, argparse
+if sys.version_info[0] < 3:
+    exec('print "! Please run me with Python version 3 !"')
+    exit()
 
 import includes.versemaker as versemaker
 import includes.prosemaker as prosemaker
