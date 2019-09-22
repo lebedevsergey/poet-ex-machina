@@ -1,0 +1,11 @@
+syntax: glob
+.env
+
+.gitattributes
+
+*.lock
+*.words
+
+.vscode/
+
+*__pycache__*

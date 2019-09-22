@@ -27,7 +27,7 @@ class AccentsAndSyllables:
         """ Automatically sets Accents And Syllables in words base with dictionary"""
         """ changes syllablesAccentsBase according to new accents statistics """		
         if not self.accentsDict:
-            self.accentsDict = self.__loadAccentsDict(self.ACCENTS_DICT_FILENAME)
+            self.__loadAccentsDict(self.ACCENTS_DICT_FILENAME)
         if not self.wordFormsDictObj:
             self.wordFormsDictObj = wordforms.wordFormsDict()
 
